@@ -1,50 +1,30 @@
 # -*- coding: utf-8 -*-
 from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.support.ui import Select
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import NoSuchElementException
-from selenium.common.exceptions import NoAlertPresentException
-import unittest, time, re, sys
+import sys
 
-class GenomeTest(unittest.TestCase):
-    def __init__(self, testname, host):
-        super(GenomeTest, self).__init__(testname)
-        self.base_url = host
-        self.driver = webdriver.Chrome("/Users/christopherLee/Downloads/chromedriver")
-        self.driver.implicitly_wait(30)
-        self.verificationErrors = []
-        self.accept_next_alert = True
-    
-    def is_element_present(self, how, what):
-        try: self.driver.find_element(by=how, value=what)
-        except NoSuchElementException as e: return False
-        return True
-    
-    def is_alert_present(self):
-        try: self.driver.switch_to_alert()
-        except NoAlertPresentException as e: return False
-        return True
-    
-    def close_alert_and_get_its_text(self):
-        try:
-            alert = self.driver.switch_to_alert()
-            alert_text = alert.text
-            if self.accept_next_alert:
-                alert.accept()
-            else:
-                alert.dismiss()
-            return alert_text
-        finally: self.accept_next_alert = True
-    
-    def tearDown(self):
-        self.driver.quit()
-        self.assertEqual([], self.verificationErrors)
+def scroll_down(driver, increment):
+   scheight = 0
+   while scheight < 1:
+      driver.execute_script("window.scrollTo(0, document.body.scrollHeight*%s);" % scheight)
+      scheight += increment
 
-if __name__ == "__main__":
-    suite = unittest.TestSuite()
-    suite.addTest(GenomeTest("test_genome_test", sys.argv[1]))
-    unittest.TextTestRunner().run(suite)
+driver = webdriver.Chrome("/Users/christopherLee/Downloads/chromedriver")
+#driver.implicitly_wait(300)
+links = open(sys.argv[1], 'r')
+for link in links:
+   driver.get(link)
+   # after page loads send javascript to slowly scroll down pagea
+   page_height = driver.execute_script("return document.body.scrollHeight")
+   #scheight = 0
+   # three classes of pages, short, medium, long
+   if page_height < 2000:
+      #while scheight < 1:
+      #   driver.execute_script("window.scrollTo(0, document.body.scrollHeight*%s);" % scheight)
+      #   scheight += .001
+      scroll_down(driver, .001)
+   #elif page_height < 10000:
+   #   scroll_down(driver, .0005)
+   else:
+      scroll_down(driver, .0001)
+
+driver.quit()  
